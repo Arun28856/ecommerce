@@ -1,8 +1,8 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FirebaseAuthGuard } from './firebase-auth.gaurd';
+import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from './decorators/current-user.decoratot';
+import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
