@@ -17,7 +17,7 @@ export class User {
   @Prop()
   avatar: string;
 
-  @Prop({ default: 'user', enum: ['user', 'admin'] })
+  @Prop({ default: 'buyer', enum: ['buyer', 'seller'] })
   role: string;
 }
 
