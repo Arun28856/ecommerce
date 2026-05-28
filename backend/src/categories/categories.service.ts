@@ -60,8 +60,8 @@ export class CategoriesService {
     }
 
     async remove(slug: string) {
-        const category = await this.categoryModel.findOne({ slug });
-        if (!category) {
+        const result = await this.categoryModel.deleteOne({ slug });
+        if (result.deletedCount === 0) {
             throw new Error('Category not found');
         }
         return { message: 'Category deleted successfully' };

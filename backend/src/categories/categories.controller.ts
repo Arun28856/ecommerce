@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Post, Put, Delete } from '@nestjs/common';
+import { Controller, Get, UseGuards, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dtos/create-categories.dto';
 import { UpdateCategoryDto } from './dtos/update-categories.dto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
-import { SellerGuard } from 'src/auth/seller.auth.gurard';
+import { SellerGuard } from '../auth/guards/seller.auth.guard';
 
 @Controller('categories')
 export class CategoriesController {
@@ -18,25 +18,25 @@ export class CategoriesController {
 
     @Public()
     @Get(':slug')
-    findOne(slug: string) {
+    findOne(@Param('slug') slug: string) {
         return this.categoriesService.findOne(slug);
     }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)
-    @Post(':slug')
-    create(dto: CreateCategoryDto) {
+    @Post()
+    create(@Body() dto: CreateCategoryDto) {
         return this.categoriesService.create(dto);
     }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)
     @Put(':slug')
-    update(slug: string, dto: UpdateCategoryDto) {
+    update(@Param('slug') slug: string, @Body() dto: UpdateCategoryDto) {
         return this.categoriesService.update(slug, dto);
     }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)
     @Delete(':slug')
-    remove(slug: string) {
+    remove(@Param('slug') slug: string) {
         return this.categoriesService.remove(slug);
     }
 
