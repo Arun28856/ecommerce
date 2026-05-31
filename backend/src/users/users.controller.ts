@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('users')

@@ -5,7 +5,7 @@ import { CategoriesService } from './categories.service';
 import { Category, CategorySchema } from './schemas/categories.schema';
 import { AuthModule } from '../auth/auth.module';
 import { User, UserSchema } from '../users/schemas/user.schema';
-import { SellerGuard } from '../auth/guards/seller.auth.guard';
+import { SellerGuard } from '../auth/guards/seller.guard';
 
 @Module({
   imports: [

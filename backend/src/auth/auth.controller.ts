@@ -1,6 +1,6 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FirebaseAuthGuard } from './firebase-auth.guard';
+import { FirebaseAuthGuard } from './guards/firebase-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from './decorators/current-user.decorator';
 

@@ -2,9 +2,9 @@ import { Controller, Get, UseGuards, Post, Put, Delete, Body, Param } from '@nes
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dtos/create-categories.dto';
 import { UpdateCategoryDto } from './dtos/update-categories.dto';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
-import { SellerGuard } from '../auth/guards/seller.auth.guard';
+import { SellerGuard } from '../auth/guards/seller.guard';
 
 @Controller('categories')
 export class CategoriesController {
