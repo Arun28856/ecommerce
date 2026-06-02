@@ -8,6 +8,7 @@ import { Payment, PaymentDocument, PaymentStatus, PaymentMethod } from './schema
 import { Order, OrderDocument, OrderStatus } from '../orders/schemas/orders.schema';
 import { CreatePaymentDto } from './dtos/create-payment.dto';
 import { VerifyPaymentDto } from './dtos/verify-payment.dto';
+import { EarningsService } from '../earnings/earnings.service';
 
 
 @Injectable()
@@ -19,6 +20,7 @@ export class PaymentsService {
         @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
         @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
         private configService: ConfigService,
+        private earningsService: EarningsService,
     ) {
         this.razorpay = new Razorpay({
             key_id: this.configService.get<string>('RAZORPAY_KEY_ID'),
@@ -50,7 +52,9 @@ export class PaymentsService {
             });
 
             order.status = OrderStatus.CONFIRMED;
-            await payment.save();
+            order.isPaid = false;
+            await Promise.all([payment.save(), order.save()]);
+            await this.earningsService.createEarningsForOrder(order, payment._id);
 
             return {
                 isCOD: true,
@@ -78,6 +82,7 @@ export class PaymentsService {
             razorpayOrderId: razorpayOrder.id,
             method: dto.method,
         });
+        await payment.save();
 
         return {
             isCOD: false,
@@ -123,6 +128,10 @@ export class PaymentsService {
             { status: OrderStatus.CONFIRMED, paymentId: dto.razorpayPaymentId, isPaid: true },
             { new: true }
         );
+
+        if (payment && order) {
+            await this.earningsService.createEarningsForOrder(order, payment._id);
+        }
 
         return {
             message: 'Payment verified successfully',

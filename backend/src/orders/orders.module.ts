@@ -8,6 +8,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { AuthModule } from '../auth/auth.module';
 import { SellerGuard } from '../auth/guards/seller.guard';
 import { BuyerGuard } from '../auth/guards/buyer.guard';
+import { EarningsModule } from '../earnings/earnings.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BuyerGuard } from '../auth/guards/buyer.guard';
       { name: User.name, schema: UserSchema },
     ]),
     AuthModule,
+    EarningsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, SellerGuard, BuyerGuard],

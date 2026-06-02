@@ -5,6 +5,7 @@ import { CreateOrderDto } from './dtos/create-order.dto';
 import { updateOrderStatusDto } from './dtos/update-order-status.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { EarningsService } from '../earnings/earnings.service';
 
 @Injectable()
 export class OrdersService {
@@ -12,6 +13,7 @@ export class OrdersService {
     constructor(
         @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+        private earningsService: EarningsService,
     ) {}
 
     async create(buyerUid: string, createOrderDto: CreateOrderDto){
@@ -128,6 +130,11 @@ export class OrdersService {
 
         order.status = updateOrderStatusDto.status;
         await order.save();
+
+        if (updateOrderStatusDto.status === OrderStatus.DELIVERED) {
+            await this.earningsService.releaseEarnings(orderId);
+        }
+
         return order;
     }
 }

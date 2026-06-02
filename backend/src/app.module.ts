@@ -8,6 +8,7 @@ import { OrdersModule } from './orders/orders.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PaymentsModule } from './payments/payments.module';
+import { EarningsModule } from './earnings/earnings.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PaymentsModule } from './payments/payments.module';
     FirebaseModule,
     CategoriesModule,
     PaymentsModule,
+    EarningsModule,
   ],
 })
 export class AppModule {}
