@@ -9,6 +9,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EarningsModule } from './earnings/earnings.module';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EarningsModule } from './earnings/earnings.module';
     CategoriesModule,
     PaymentsModule,
     EarningsModule,
+    CheckoutModule,
   ],
 })
 export class AppModule {}
