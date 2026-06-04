@@ -9,14 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "firebase": "^12.13.0",
+    "@hookform/resolvers": "^5.4.0",
+    "axios": "^1.17.0",
+    "firebase": "^12.14.0",
+    "lucide-react": "^1.17.0",
     "next": "16.2.6",
+    "razorpay": "^2.9.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.77.0",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.41",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
