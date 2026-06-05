@@ -8,11 +8,16 @@ export class AuthService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
     async syncUser(firebaseUser: any) {
-        const { uid, email, displayName, photo } = firebaseUser;
+        const { uid, email, name, displayName, picture, photoURL } = firebaseUser;
         let user = await this.userModel.findOne({ uid });
 
         if (!user) {
-            user = new this.userModel({ uid, email, displayName, photo });
+            user = new this.userModel({
+                uid,
+                email,
+                name: name ?? displayName ?? '',
+                avatar: picture ?? photoURL ?? '',
+            });
         }
 
         return user.save();
