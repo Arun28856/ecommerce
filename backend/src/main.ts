@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const allowedOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+    ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim().replace(/\/+$/, ''))
     : ['http://localhost:3000'];
   app.enableCors({ origin: allowedOrigins });
 
@@ -17,6 +17,7 @@ async function bootstrap() {
   await app.listen(port);
   console.log('✅ Connected to MongoDB');
   console.log(`✅ Nest application successfully started on port ${port}`);
+  console.log(`✅ CORS allowed origins: ${allowedOrigins.join(', ')}`);
 }
 bootstrap();
         
