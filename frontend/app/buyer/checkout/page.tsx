@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCartStore } from '@/store/cart.store';
+import { useToastStore } from '@/store/toast.store';
 import { checkoutService } from '@/services/checkout.service';
 import { paymentService } from '@/services/payments.service';
 import Input from '@/components/ui/Input';
@@ -35,6 +36,7 @@ const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: string }[] =
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, clearCart, totalAmount } = useCartStore();
+  const showToast = useToastStore((s) => s.show);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [summary, setSummary] = useState<{
     subtotal: number;
@@ -78,6 +80,7 @@ export default function CheckoutPage() {
 
       if (isCOD) {
         clearCart();
+        showToast('Order placed successfully! 🎉');
         router.push(`/buyer/orders/${order._id}?success=1`);
         return;
       }
@@ -111,6 +114,7 @@ export default function CheckoutPage() {
               orderId: order._id,
             });
             clearCart();
+            showToast('Payment successful! Order confirmed 🎉');
             router.push(`/buyer/orders/${order._id}?success=1`);
           } catch {
             setError('Payment verification failed. Contact support.');
