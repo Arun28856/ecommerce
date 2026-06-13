@@ -25,12 +25,12 @@ const addressSchema = z.object({
 
 type AddressForm = z.infer<typeof addressSchema>;
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'cod', label: 'Cash on Delivery', icon: '💵' },
-  { value: 'upi', label: 'UPI', icon: '📱' },
-  { value: 'card', label: 'Credit / Debit Card', icon: '💳' },
-  { value: 'netbanking', label: 'Net Banking', icon: '🏦' },
-  { value: 'wallet', label: 'Wallet', icon: '👛' },
+const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: string; subtext: string }[] = [
+  { value: 'cod', label: 'Cash on Delivery', icon: '💵', subtext: 'Pay when your order arrives' },
+  { value: 'upi', label: 'UPI', icon: '📱', subtext: 'Google Pay, PhonePe, Paytm & more' },
+  { value: 'card', label: 'Credit / Debit Card', icon: '💳', subtext: 'Visa, Mastercard, RuPay & more' },
+  { value: 'netbanking', label: 'Net Banking', icon: '🏦', subtext: 'All major banks supported' },
+  { value: 'wallet', label: 'Wallet', icon: '👛', subtext: 'Paytm, Mobikwik, Amazon Pay & more' },
 ];
 
 export default function CheckoutPage() {
@@ -120,7 +120,10 @@ export default function CheckoutPage() {
             setError('Payment verification failed. Contact support.');
           }
         },
-        prefill: { contact: address.phone },
+        prefill: {
+          contact: address.phone,
+          ...(paymentMethod !== 'cod' && { method: paymentMethod }),
+        },
         theme: { color: '#2563EB' },
         modal: {
           ondismiss: () => setLoading(false),
@@ -191,7 +194,10 @@ export default function CheckoutPage() {
                       className="accent-blue-600"
                     />
                     <span className="text-lg">{pm.icon}</span>
-                    <span className="text-sm font-medium text-gray-800">{pm.label}</span>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-gray-800">{pm.label}</span>
+                      <p className="text-xs text-gray-400">{pm.subtext}</p>
+                    </div>
                   </label>
                 ))}
               </div>

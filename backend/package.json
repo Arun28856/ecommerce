@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "start:dev": "nest start --watch --port 3001",
+    "start:prod": "node dist/main",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run start:dev",
