@@ -3,21 +3,21 @@ import { Payment, PaymentMethod } from '@/types';
 
 export const paymentService = {
   create: (orderId: string, method: PaymentMethod) =>
-    api.post('/payment/create', { orderId, method }),
+    api.post('/payments/create', { orderId, method }),
 
   verify: (data: {
     razorpayOrderId: string;
     razorpayPaymentId: string;
     razorpaySignature: string;
     orderId: string;
-  }) => api.post('/payment/verify', data),
+  }) => api.post('/payments/verify', data),
 
   getByOrder: (orderId: string) =>
-    api.get<Payment>(`/payment/order/${orderId}`),
+    api.get<Payment>(`/payments/order/${orderId}`),
 
   getEarnings: () =>
-    api.get('/payment/earnings'),
+    api.get('/earnings'),
 
   getEarningsSummary: () =>
-    api.get('/payment/earnings/summary'),
+    api.get('/earnings/summary'),
 };

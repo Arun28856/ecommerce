@@ -12,8 +12,8 @@ export const ordersService = {
     api.patch<Order>(`/orders/my-orders/${id}/cancel`),
 
   getSellerOrders: () =>
-    api.get<Order[]>('/orders/seller/my-sales'),
+    api.get<Order[]>('/orders/sellers/my-sales'),
 
   updateStatus: (id: string, status: OrderStatus) =>
-    api.patch(`/orders/seller/${id}/status`, { status }),
+    api.patch(`/orders/sellers/my-sales/${id}/status`, { status }),
 };

@@ -55,10 +55,10 @@ export interface OrderItem {
 export interface ShippingAddress {
   fullName: string;
   phone: string;
-  addressLine: string;
+  address: string;
   city: string;
   state: string;
-  pincode: string;
+  postalCode: string;
 }
 
 export type OrderStatus =
@@ -71,9 +71,9 @@ export type OrderStatus =
 export interface Order {
   _id: string;
   buyerUid: string;
-  items: OrderItem[];
+  orderItems: OrderItem[];
   shippingAddress: ShippingAddress;
-  totalAmount: number;
+  totalPrice: number;
   status: OrderStatus;
   isPaid: boolean;
   paymentId?: string;
@@ -105,12 +105,12 @@ export interface Payment {
 export interface SellerEarning {
   _id: string;
   sellerUid: string;
-  order: Order;
+  order: Order | string;
   grossAmount: number;
-  platformFee: number;
-  razorpayFee: number;
+  platformFeePercentage: number;
+  platformFeeAmount: number;
   netAmount: number;
-  status: 'pending' | 'settled';
+  status: 'pending' | 'available' | 'paid_out';
   createdAt: string;
 }
 

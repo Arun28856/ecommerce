@@ -20,17 +20,17 @@ export class ProductsController {
         return this.productsService.findAll(query);
     }
 
-    @Public()
-    @Get(':slug')
-    findOne(@Param('slug') slug: string) {
-        return this.productsService.findOne(slug);
-    }
-
     //Seller-only routes for managing products
     @Get('seller/my-products')
     @UseGuards(FirebaseAuthGuard, SellerGuard)
     findMySells(@CurrentUser() user: any) {
         return this.productsService.findMySells(user.uid);
+    }
+
+    @Public()
+    @Get(':slug')
+    findOne(@Param('slug') slug: string) {
+        return this.productsService.findOne(slug);
     }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)

@@ -26,7 +26,7 @@ export class orderItem {
   quantity: number;
 
   @Prop({required: true})
-  sellerUid: Types.ObjectId;
+  sellerUid: string;
 
   @Prop({default: ''})
   image: string;
