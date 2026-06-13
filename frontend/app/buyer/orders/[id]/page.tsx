@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ordersService } from '@/services/orders.service';
+import { useToastStore } from '@/store/toast.store';
 import { Order, OrderStatus } from '@/types';
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -24,6 +25,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const isSuccess = searchParams.get('success') === '1';
+  const showToast = useToastStore((s) => s.show);
 
   useEffect(() => {
     ordersService.getOne(id)
@@ -33,13 +35,14 @@ export default function OrderDetailPage() {
   }, [id]);
 
   const handleCancel = async () => {
-    if (!order) return;
+    if (!order || !confirm('Cancel this order?')) return;
     setCancelling(true);
     try {
       const res = await ordersService.cancel(order._id);
       setOrder(res.data);
+      showToast('Order cancelled successfully');
     } catch (err: any) {
-      alert(err?.message ?? 'Cancel failed');
+      showToast(err?.response?.data?.message ?? 'Failed to cancel order', 'error');
     } finally {
       setCancelling(false);
     }

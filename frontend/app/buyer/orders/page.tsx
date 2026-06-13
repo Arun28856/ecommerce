@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ordersService } from '@/services/orders.service';
+import { useToastStore } from '@/store/toast.store';
 import { Order, OrderStatus } from '@/types';
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -24,6 +25,8 @@ const STATUS_BORDER: Record<OrderStatus, string> = {
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.show);
 
   useEffect(() => {
     ordersService.getMyOrders()
@@ -31,6 +34,21 @@ export default function MyOrdersPage() {
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleCancel = async (e: React.MouseEvent, orderId: string) => {
+    e.preventDefault();
+    if (!confirm('Cancel this order?')) return;
+    setCancellingId(orderId);
+    try {
+      const res = await ordersService.cancel(orderId);
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? res.data : o)));
+      showToast('Order cancelled successfully');
+    } catch (err: any) {
+      showToast(err?.response?.data?.message ?? 'Failed to cancel order', 'error');
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -75,10 +93,9 @@ export default function MyOrdersPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
       <div className="space-y-4">
         {orders.map((order) => (
-          <Link
+          <div
             key={order._id}
-            href={`/buyer/orders/${order._id}`}
-            className={`block bg-white rounded-xl border border-l-4 border-gray-200 p-5 hover:shadow-md transition-shadow ${STATUS_BORDER[order.status]}`}
+            className={`bg-white rounded-xl border border-l-4 border-gray-200 p-5 hover:shadow-md transition-shadow ${STATUS_BORDER[order.status]}`}
           >
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>
@@ -117,7 +134,26 @@ export default function MyOrdersPage() {
               </p>
               <p className="font-semibold text-gray-900">₹{order.totalPrice.toLocaleString()}</p>
             </div>
-          </Link>
+
+            {/* Actions */}
+            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
+              <Link
+                href={`/buyer/orders/${order._id}`}
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                View Details →
+              </Link>
+              {order.status === 'pending' && (
+                <button
+                  onClick={(e) => handleCancel(e, order._id)}
+                  disabled={cancellingId === order._id}
+                  className="text-sm text-red-500 hover:text-red-700 font-medium border border-red-200 hover:bg-red-50 px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {cancellingId === order._id ? 'Cancelling...' : 'Cancel Order'}
+                </button>
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </div>
