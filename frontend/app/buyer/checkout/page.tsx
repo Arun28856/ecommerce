@@ -94,6 +94,14 @@ export default function CheckoutPage() {
         currency: 'INR',
         name: 'ShopHub',
         order_id: payment.razorpayOrderId,
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
+          emi: true,
+          paylater: true,
+        },
         handler: async (response: any) => {
           try {
             await paymentService.verify({
