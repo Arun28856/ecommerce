@@ -134,7 +134,7 @@ export default function CartPage() {
 
             <button
               onClick={() => router.push('/buyer/checkout')}
-              className="mt-5 w-full py-3 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition-colors"
+              className="mt-5 w-full py-3 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 active:bg-orange-700 transition-colors"
             >
               Proceed to Checkout
             </button>

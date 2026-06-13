@@ -65,9 +65,16 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Create an account</h1>
-        <p className="text-sm text-gray-500 mb-6">Join ShopHub as a buyer or seller</p>
+      <div className="w-full max-w-md">
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <span className="text-3xl font-extrabold text-blue-600">ShopHub</span>
+          <p className="text-sm text-gray-500 mt-1">Your one-stop marketplace</p>
+        </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <h1 className="text-xl font-bold text-gray-900 mb-1">Create an account</h1>
+        <p className="text-sm text-gray-500 mb-6">Join as a buyer or seller</p>
 
         {/* Role selector */}
         <div className="flex gap-3 mb-6">
@@ -169,6 +176,7 @@ export default function RegisterPage() {
             Sign in
           </Link>
         </p>
+      </div>
       </div>
     </div>
   );

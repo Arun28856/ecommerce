@@ -13,6 +13,14 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   cancelled: 'bg-red-100 text-red-600',
 };
 
+const STATUS_BORDER: Record<OrderStatus, string> = {
+  pending: 'border-l-yellow-400',
+  confirmed: 'border-l-blue-400',
+  shipped: 'border-l-purple-400',
+  delivered: 'border-l-green-400',
+  cancelled: 'border-l-red-400',
+};
+
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +78,7 @@ export default function MyOrdersPage() {
           <Link
             key={order._id}
             href={`/buyer/orders/${order._id}`}
-            className="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow"
+            className={`block bg-white rounded-xl border border-l-4 border-gray-200 p-5 hover:shadow-md transition-shadow ${STATUS_BORDER[order.status]}`}
           >
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>

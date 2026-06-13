@@ -105,22 +105,37 @@ export default function OrderDetailPage() {
       {/* Progress tracker */}
       {order.status !== 'cancelled' && (
         <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
-          <div className="flex items-center">
+          <div className="flex items-center justify-between gap-2">
             {STATUS_STEPS.map((step, i) => (
-              <div key={step} className="flex items-center flex-1 last:flex-none">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
-                  i <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
+              <div key={step} className="flex-1 flex flex-col items-center gap-1.5">
+                <div className="relative w-full flex items-center">
+                  {i > 0 && (
+                    <div className={`absolute left-0 right-1/2 h-0.5 -translate-y-1/2 top-1/2 ${i <= currentStep ? 'bg-blue-500' : 'bg-gray-200'}`} />
+                  )}
+                  {i < STATUS_STEPS.length - 1 && (
+                    <div className={`absolute left-1/2 right-0 h-0.5 -translate-y-1/2 top-1/2 ${i < currentStep ? 'bg-blue-500' : 'bg-gray-200'}`} />
+                  )}
+                  <div className={`relative mx-auto w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 ${
+                    i < currentStep
+                      ? 'bg-blue-600 text-white'
+                      : i === currentStep
+                      ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                      : 'bg-gray-100 text-gray-400 border border-gray-200'
+                  }`}>
+                    {i < currentStep ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      i + 1
+                    )}
+                  </div>
+                </div>
+                <span className={`text-[11px] capitalize text-center font-medium ${
+                  i <= currentStep ? 'text-blue-600' : 'text-gray-400'
                 }`}>
-                  {i < currentStep ? '✓' : i + 1}
-                </div>
-                <div className="flex-col items-center mx-1 hidden sm:flex">
-                  <span className={`text-xs capitalize ${i <= currentStep ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
-                    {step}
-                  </span>
-                </div>
-                {i < STATUS_STEPS.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 ${i < currentStep ? 'bg-blue-600' : 'bg-gray-200'}`} />
-                )}
+                  {step}
+                </span>
               </div>
             ))}
           </div>

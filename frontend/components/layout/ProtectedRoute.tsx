@@ -17,13 +17,13 @@ export default function ProtectedRoute({ children, requiredRole }: Props) {
     if (!loading) {
       // Not logged in → go to login
       if (!user) {
-        router.push('/login');
+        router.push('/auth/login');
         return;
       }
 
-      // Wrong role → redirect
+      // Wrong role → redirect to their correct home
       if (requiredRole && user.role !== requiredRole) {
-        router.push(user.role === 'seller' ? '/dashboard' : '/');
+        router.push(user.role === 'seller' ? '/seller/dashboard' : '/buyer/products');
         return;
       }
     }
