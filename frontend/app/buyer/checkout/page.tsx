@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,6 +44,7 @@ export default function CheckoutPage() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [razorpayReady, setRazorpayReady] = useState(false);
 
   const {
     register,
@@ -81,14 +83,19 @@ export default function CheckoutPage() {
       }
 
       // Razorpay flow
-      if (typeof window !== 'undefined' && (window as any).Razorpay) {
-        const rzp = new (window as any).Razorpay({
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-          amount: payment.amount * 100,
-          currency: 'INR',
-          name: 'ShopHub',
-          order_id: payment.razorpayOrderId,
-          handler: async (response: any) => {
+      const RazorpayConstructor = (window as any).Razorpay;
+      if (!RazorpayConstructor) {
+        setError('Payment gateway not ready. Please select Cash on Delivery or refresh the page.');
+        return;
+      }
+      const rzp = new RazorpayConstructor({
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: payment.amount * 100,
+        currency: 'INR',
+        name: 'ShopHub',
+        order_id: payment.razorpayOrderId,
+        handler: async (response: any) => {
+          try {
             await paymentService.verify({
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
@@ -97,14 +104,17 @@ export default function CheckoutPage() {
             });
             clearCart();
             router.push(`/buyer/orders/${order._id}?success=1`);
-          },
-          prefill: { contact: address.phone },
-          theme: { color: '#2563EB' },
-        });
-        rzp.open();
-      } else {
-        setError('Razorpay not loaded. Please use COD for now.');
-      }
+          } catch {
+            setError('Payment verification failed. Contact support.');
+          }
+        },
+        prefill: { contact: address.phone },
+        theme: { color: '#2563EB' },
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+      });
+      rzp.open();
     } catch (err: any) {
       setError(err?.message ?? 'Checkout failed. Please try again.');
     } finally {
@@ -115,6 +125,12 @@ export default function CheckoutPage() {
   if (items.length === 0) return null;
 
   return (
+    <>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+        onLoad={() => setRazorpayReady(true)}
+      />
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
 
@@ -213,14 +229,20 @@ export default function CheckoutPage() {
                 type="submit"
                 fullWidth
                 loading={isSubmitting || loading}
+                disabled={paymentMethod !== 'cod' && !razorpayReady}
                 className="mt-4"
               >
-                {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Pay Now'}
+                {paymentMethod === 'cod'
+                  ? 'Place Order (COD)'
+                  : razorpayReady
+                  ? 'Pay Now'
+                  : 'Loading payment...'}
               </Button>
             </div>
           </div>
         </div>
       </form>
     </div>
+    </>
   );
 }
