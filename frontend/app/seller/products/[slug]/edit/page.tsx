@@ -20,6 +20,7 @@ const schema = z.object({
   images: z.string().optional(),
 });
 
+type FormValues = z.input<typeof schema>;
 type FormData = z.infer<typeof schema>;
 
 export default function EditProductPage() {
@@ -35,7 +36,7 @@ export default function EditProductPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues, any, FormData>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
     Promise.all([
