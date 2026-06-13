@@ -10,6 +10,8 @@ import { categoriesService } from '@/services/categories.service';
 import { Category, Product } from '@/types';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import CategorySelect from '@/components/ui/CategorySelect';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -17,7 +19,6 @@ const schema = z.object({
   price: z.coerce.number().min(1, 'Price must be at least ₹1'),
   stock: z.coerce.number().min(0, 'Stock cannot be negative'),
   categorySlug: z.string().min(1, 'Please select a category'),
-  images: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -28,14 +29,20 @@ export default function EditProductPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(true);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { categorySlug: '' } });
+
+  const categorySlug = watch('categorySlug');
 
   useEffect(() => {
     Promise.all([
@@ -45,13 +52,13 @@ export default function EditProductPage() {
       setCategories(catRes.data);
       const p = prodRes.data;
       setProduct(p);
+      setExistingImages(p.images || []);
       reset({
         name: p.name,
         description: p.description,
         price: p.price,
         stock: p.stock,
         categorySlug: p.category?.slug || '',
-        images: p.images?.join('\n') || '',
       });
     }).catch(() => {
       setError('Failed to load product');
@@ -61,20 +68,19 @@ export default function EditProductPage() {
   const onSubmit = async (data: FormData) => {
     setError('');
     try {
-      const images = data.images
-        ? data.images.split('\n').map((u) => u.trim()).filter(Boolean)
-        : [];
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('description', data.description);
+      formData.append('price', String(data.price));
+      formData.append('stock', String(data.stock));
+      formData.append('categorySlug', data.categorySlug);
+      formData.append('existingImages', JSON.stringify(existingImages));
+      imageFiles.forEach((file) => formData.append('images', file));
 
-      await productsService.update(slug, {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        stock: data.stock,
-        images,
-      });
+      await productsService.update(slug, formData);
       router.push('/seller/products');
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to update product');
+      setError(err?.response?.data?.message ?? 'Failed to update product');
     }
   };
 
@@ -164,34 +170,20 @@ export default function EditProductPage() {
             />
           </div>
 
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-medium text-gray-700">Category</label>
-            <select
-              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                errors.categorySlug ? 'border-red-500' : 'border-gray-300'
-              }`}
-              {...register('categorySlug')}
-            >
-              <option value="">Select a category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c.slug}>{c.name}</option>
-              ))}
-            </select>
-            {errors.categorySlug && (
-              <p className="text-sm text-red-500">{errors.categorySlug.message}</p>
-            )}
-          </div>
+          <CategorySelect
+            categories={categories}
+            value={categorySlug}
+            onChange={(slug) => setValue('categorySlug', slug, { shouldValidate: true })}
+            onCategoryCreated={(cat) => setCategories((prev) => [...prev, cat])}
+            error={errors.categorySlug?.message}
+          />
 
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-medium text-gray-700">
-              Image URLs <span className="text-gray-400 font-normal">(one per line)</span>
-            </label>
-            <textarea
-              rows={3}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder:text-gray-400 resize-none text-sm"
-              {...register('images')}
-            />
-          </div>
+          <ImageUpload
+            existingImages={existingImages}
+            onRemoveExisting={(url) => setExistingImages((prev) => prev.filter((u) => u !== url))}
+            files={imageFiles}
+            onFilesChange={setImageFiles}
+          />
 
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => router.back()}>

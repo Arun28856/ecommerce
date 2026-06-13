@@ -1,11 +1,13 @@
-import { IsArray, IsBIC, IsBoolean, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { Type } from "class-transformer";
 
 export class UpdateProductDto {
 
     @IsOptional()
     @IsString()
     name: string;
-    
+
+    @Type(() => Number)
     @Min(0)
     @IsNumber()
     @IsOptional()
@@ -15,6 +17,7 @@ export class UpdateProductDto {
     @IsString()
     description: string;
 
+    @Type(() => Number)
     @Min(0)
     @IsNumber()
     @IsOptional()
@@ -23,11 +26,6 @@ export class UpdateProductDto {
     @IsOptional()
     @IsString()
     categorySlug: string;
-
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    images?: string[];
 
     @IsOptional()
     @IsBoolean()
