@@ -1,3 +1,12 @@
+// Bank details (seller payout info)
+export interface BankDetails {
+  accountHolderName: string;
+  accountNumber: string;
+  ifscCode: string;
+  bankName: string;
+  upiId?: string;
+}
+
 // User
 export interface User {
   _id: string;
@@ -6,6 +15,7 @@ export interface User {
   name: string;
   avatar?: string;
   role: 'buyer' | 'seller';
+  bankDetails?: BankDetails;
   createdAt: string;
 }
 

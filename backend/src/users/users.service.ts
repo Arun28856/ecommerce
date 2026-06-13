@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { BankDetailsDto } from './dtos/bank-details.dto';
 
 @Injectable()
 export class UsersService {
@@ -37,6 +38,17 @@ export class UsersService {
     const user = await this.userModel.findOneAndDelete({ uid });
     if (!user) throw new NotFoundException('User not found');
     return { message: 'Account deleted successfully' };
+  }
+
+  // Add/update payout bank details
+  async updateBankDetails(uid: string, dto: BankDetailsDto) {
+    const user = await this.userModel.findOneAndUpdate(
+      { uid },
+      { $set: { bankDetails: dto } },
+      { new: true },
+    );
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   // Switch role: buyer ↔ seller

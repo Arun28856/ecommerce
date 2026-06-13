@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { BankDetailsDto } from './dtos/bank-details.dto';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -42,5 +43,11 @@ export class UsersController {
   @Patch('me/switch-role')
   switchRole(@CurrentUser() user: any) {
     return this.usersService.switchRole(user.uid);
+  }
+
+  // PATCH /api/users/me/bank-details — add/update seller payout details
+  @Patch('me/bank-details')
+  updateBankDetails(@CurrentUser() user: any, @Body() dto: BankDetailsDto) {
+    return this.usersService.updateBankDetails(user.uid, dto);
   }
 }
