@@ -24,6 +24,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const { registerWithEmail, loginWithGoogle, user, loading } = useAuth();
   const router = useRouter();
+  const [role, setRole] = useState<'buyer' | 'seller'>('buyer');
   const [error, setError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -42,19 +43,19 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setError('');
     try {
-      await registerWithEmail(data.email, data.password);
-      router.push('/buyer/products');
+      await registerWithEmail(data.email, data.password, role);
+      router.push(role === 'seller' ? '/seller/dashboard' : '/buyer/products');
     } catch (err: any) {
       setError(err?.message ?? 'Registration failed. Please try again.');
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     setError('');
     setGoogleLoading(true);
     try {
       await loginWithGoogle();
-      router.push('/buyer/products');
+      router.push(role === 'seller' ? '/seller/dashboard' : '/buyer/products');
     } catch (err: any) {
       setError(err?.message ?? 'Google sign-up failed. Please try again.');
     } finally {
@@ -66,7 +67,45 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Create an account</h1>
-        <p className="text-sm text-gray-500 mb-6">Sign up to start shopping or selling</p>
+        <p className="text-sm text-gray-500 mb-6">Join ShopHub as a buyer or seller</p>
+
+        {/* Role selector */}
+        <div className="flex gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => setRole('buyer')}
+            className={`flex-1 flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 transition-all ${
+              role === 'buyer'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+            }`}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <div className="text-center">
+              <p className="text-sm font-semibold">I'm a Buyer</p>
+              <p className="text-xs mt-0.5 opacity-70">Shop for products</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('seller')}
+            className={`flex-1 flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 transition-all ${
+              role === 'seller'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+            }`}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <div className="text-center">
+              <p className="text-sm font-semibold">I'm a Seller</p>
+              <p className="text-xs mt-0.5 opacity-70">Sell your products</p>
+            </div>
+          </button>
+        </div>
 
         {error && (
           <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
@@ -98,7 +137,7 @@ export default function RegisterPage() {
           />
 
           <Button type="submit" fullWidth loading={isSubmitting}>
-            Create account
+            Create {role === 'seller' ? 'Seller' : 'Buyer'} Account
           </Button>
         </form>
 
@@ -113,7 +152,7 @@ export default function RegisterPage() {
           variant="outline"
           fullWidth
           loading={googleLoading}
-          onClick={handleGoogleLogin}
+          onClick={handleGoogleSignUp}
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

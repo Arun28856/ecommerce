@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FirebaseAuthGuard } from './guards/firebase-auth.guard';
 import { UseGuards } from '@nestjs/common';
@@ -11,8 +11,8 @@ export class AuthController {
 
     @Post('sync')
     @UseGuards(FirebaseAuthGuard)
-    async syncUser(@CurrentUser() user: any) {
-        return this.authService.syncUser(user);
+    async syncUser(@CurrentUser() user: any, @Body() body: { role?: string }) {
+        return this.authService.syncUser(user, body?.role);
     }
 
     @Get('me')

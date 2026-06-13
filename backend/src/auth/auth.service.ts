@@ -7,7 +7,7 @@ import { User } from '../users/schemas/user.schema';
 export class AuthService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-    async syncUser(firebaseUser: any) {
+    async syncUser(firebaseUser: any, role?: string) {
         const { uid, email, name, displayName, picture, photoURL } = firebaseUser;
         let user = await this.userModel.findOne({ uid });
 
@@ -17,6 +17,7 @@ export class AuthService {
                 email,
                 name: name ?? displayName ?? '',
                 avatar: picture ?? photoURL ?? '',
+                role: role === 'seller' ? 'seller' : 'buyer',
             });
         }
 

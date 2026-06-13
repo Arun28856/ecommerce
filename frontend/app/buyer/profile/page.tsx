@@ -1,16 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const router = useRouter();
+  const [switching, setSwitching] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push('/auth/login');
+  };
+
+  const handleSwitchRole = async () => {
+    if (!confirm('Switch to Seller account? You will be redirected to the seller dashboard.')) return;
+    setSwitching(true);
+    try {
+      await switchRole();
+      router.push('/seller/dashboard');
+    } catch (err: any) {
+      alert(err?.message ?? 'Failed to switch role');
+    } finally {
+      setSwitching(false);
+    }
   };
 
   if (!user) return null;
@@ -55,6 +70,29 @@ export default function ProfilePage() {
                 day: 'numeric', month: 'long', year: 'numeric',
               })}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Switch to Seller */}
+      <div className="mt-4 bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-purple-50 rounded-lg text-purple-600 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-gray-900">Become a Seller</p>
+            <p className="text-sm text-gray-500 mt-0.5">Switch to seller mode to list products and manage orders</p>
+            <Button
+              variant="outline"
+              loading={switching}
+              onClick={handleSwitchRole}
+              className="mt-3"
+            >
+              Switch to Seller Account
+            </Button>
           </div>
         </div>
       </div>

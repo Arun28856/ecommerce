@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,13 +46,27 @@ const navItems = [
 ];
 
 function SellerSidebar() {
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [switching, setSwitching] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push('/auth/login');
+  };
+
+  const handleSwitchToBuyer = async () => {
+    if (!confirm('Switch to Buyer account? You will be redirected to the shop.')) return;
+    setSwitching(true);
+    try {
+      await switchRole();
+      router.push('/buyer/products');
+    } catch {
+      alert('Failed to switch role');
+    } finally {
+      setSwitching(false);
+    }
   };
 
   return (
@@ -85,6 +100,16 @@ function SellerSidebar() {
             <p className="text-sm font-medium text-gray-900 truncate">{user?.name || 'Seller'}</p>
             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
           </div>
+          <button
+            onClick={handleSwitchToBuyer}
+            disabled={switching}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 mb-1"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            {switching ? 'Switching...' : 'Switch to Buyer'}
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"

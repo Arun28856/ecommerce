@@ -26,9 +26,10 @@ interface AuthContextType {
     loading: boolean;
     loginWithEmail: (email: string, password: string) => Promise<void>;
     loginWithGoogle: () => Promise<void>;
-    registerWithEmail: (email: string, password: string) => Promise<void>;
+    registerWithEmail: (email: string, password: string, role?: 'buyer' | 'seller') => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
+    switchRole: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -39,10 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  //Sync Firbase with MongoDB
-  const syncToMongoDB = async () => {
+  //Sync Firebase with MongoDB
+  const syncToMongoDB = async (role?: 'buyer' | 'seller') => {
     try {
-      const res = await authService.syncUser();
+      const res = await authService.syncUser(role);
       setUser(res.data);
     } catch (error) {
       console.error('Error syncing user to MongoDB:', error);
@@ -87,9 +88,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   //Email/Password Registration
-  const registerWithEmail = async (email: string, password: string) => {
+  const registerWithEmail = async (email: string, password: string, role?: 'buyer' | 'seller') => {
     await createUserWithEmailAndPassword(auth, email, password);
-    await syncToMongoDB();
+    await syncToMongoDB(role);
+  };
+
+  // Switch role buyer ↔ seller
+  const switchRole = async () => {
+    const res = await authService.switchRole();
+    setUser(res.data);
   };
 
   // Logout
@@ -109,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registerWithEmail,
         logout,
         refreshUser,
+        switchRole,
       }}
     >
       {children}
