@@ -24,8 +24,10 @@ export const productsService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 
-  update: (slug: string, data: Partial<Product>) =>
-    api.put<Product>(`/products/${slug}`, data),
+  update: (slug: string, data: FormData) =>
+    api.put<Product>(`/products/${slug}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 
   remove: (slug: string) =>
     api.delete(`/products/${slug}`),

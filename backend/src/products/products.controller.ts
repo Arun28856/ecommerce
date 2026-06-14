@@ -1,4 +1,5 @@
-import { Controller, Get, Query, Param, UseGuards, Post, Body, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Query, Param, UseGuards, Post, Body, Put, Delete, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dtos/create-products.dto';
 import { UpdateProductDto } from './dtos/update-products.dto';
@@ -7,6 +8,7 @@ import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { SellerGuard } from '../auth/guards/seller.guard';
 import {CurrentUser} from '../auth/decorators/current-user.decorator';
 import {Public} from '../auth/decorators/public.decorator';
+import { productImagesMulterOptions } from './multer.config';
 
 
 @Controller('products')
@@ -35,14 +37,27 @@ export class ProductsController {
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)
     @Post()
-    create(@Body() createDto: CreateProductDto, @CurrentUser() user: any) {
-        return this.productsService.create(createDto, user.uid);
-    }   
+    @UseInterceptors(FilesInterceptor('images', 5, productImagesMulterOptions))
+    create(
+        @Body() createDto: CreateProductDto,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() user: any,
+    ) {
+        return this.productsService.create(createDto, files ?? [], user.uid);
+    }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)
     @Put(':slug')
-    update(@Param('slug') slug: string, @Body() updateDto: UpdateProductDto, @CurrentUser() user: any) {
-        return this.productsService.update(slug, updateDto, user.uid);
+    @UseInterceptors(FilesInterceptor('images', 5, productImagesMulterOptions))
+    update(
+        @Param('slug') slug: string,
+        @Body() updateDto: UpdateProductDto,
+        @Body('existingImages') existingImagesRaw: string,
+        @UploadedFiles() files: Express.Multer.File[],
+        @CurrentUser() user: any,
+    ) {
+        const existingImages: string[] = existingImagesRaw ? JSON.parse(existingImagesRaw) : [];
+        return this.productsService.update(slug, updateDto, existingImages, files ?? [], user.uid);
     }
 
     @UseGuards(FirebaseAuthGuard, SellerGuard)

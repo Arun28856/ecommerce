@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EarningsModule } from './earnings/earnings.module';
@@ -28,6 +29,7 @@ import { CheckoutModule } from './checkout/checkout.module';
     ProductsModule,
     OrdersModule,
     FirebaseModule,
+    CloudinaryModule,
     CategoriesModule,
     PaymentsModule,
     EarningsModule,

@@ -6,6 +6,7 @@ import {CreateProductDto} from './dtos/create-products.dto';
 import {UpdateProductDto} from './dtos/update-products.dto';
 import {QueryProductDto} from './dtos/query-products.dto';
 import { InjectModel } from '@nestjs/mongoose';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductsService {
@@ -13,6 +14,7 @@ export class ProductsService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
         @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+        private cloudinaryService: CloudinaryService,
     ) {}
 
     private generateSlug(name: string): string {
@@ -81,16 +83,20 @@ export class ProductsService {
         return products;
     }
 
-    async create(createDto: CreateProductDto, sellerUid: string) {
+    async create(createDto: CreateProductDto, files: Express.Multer.File[], sellerUid: string) {
         const category = await this.categoryModel.findOne({ slug: createDto.categorySlug });
         if (!category) {
             throw new NotFoundException('Category not found');
         }
 
         const slug = this.generateSlug(createDto.name);
+        const images = await Promise.all(
+            files.map((file) => this.cloudinaryService.uploadFile(file, `products/${sellerUid}`)),
+        );
 
         const product = new this.productModel({
             ...createDto,
+            images,
             slug,
             sellerUid,
             category: category._id,
@@ -98,12 +104,12 @@ export class ProductsService {
             reviewCount: 0,
             isActive: true,
         });
-        
+
         await product.save();
         return product.populate('category', 'name slug');
     }
 
-    async update(id: string, updateDto: UpdateProductDto, sellerUid: string) {
+    async update(id: string, updateDto: UpdateProductDto, existingImages: string[], files: Express.Multer.File[], sellerUid: string) {
         const product = await this.productModel.findOne({ slug: id });
         if (!product) {
             throw new NotFoundException('Product not found');
@@ -120,18 +126,23 @@ export class ProductsService {
 
         const updateSlug = updateDto.name ? this.generateSlug(updateDto.name) : product.slug;
 
+        const newImages = await Promise.all(
+            files.map((file) => this.cloudinaryService.uploadFile(file, `products/${sellerUid}`)),
+        );
+
         const updated = await this.productModel.findOneAndUpdate(
             { slug: id },
-            { 
+            {
                 $set: {
                     ...updateDto,
                     slug: updateSlug,
                     category: categoryId,
+                    images: [...existingImages, ...newImages],
                 }
              },
             { new: true },
         )
-        
+
         if (!updated) {
             throw new NotFoundException('Product not found');
         }

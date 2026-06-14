@@ -10,6 +10,8 @@ import { categoriesService } from '@/services/categories.service';
 import { Category } from '@/types';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import CategorySelect from '@/components/ui/CategorySelect';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -17,7 +19,6 @@ const schema = z.object({
   price: z.coerce.number().min(1, 'Price must be at least ₹1'),
   stock: z.coerce.number().min(0, 'Stock cannot be negative'),
   categorySlug: z.string().min(1, 'Please select a category'),
-  images: z.string().optional(),
 });
 
 type FormValues = z.input<typeof schema>;
@@ -26,13 +27,18 @@ type FormData = z.infer<typeof schema>;
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues, any, FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues, any, FormData>({ resolver: zodResolver(schema), defaultValues: { categorySlug: '' } });
+
+  const categorySlug = watch('categorySlug');
 
   useEffect(() => {
     categoriesService.getAll().then((r) => setCategories(r.data)).catch(() => {});
@@ -41,22 +47,18 @@ export default function NewProductPage() {
   const onSubmit = async (data: FormData) => {
     setError('');
     try {
-      const images = data.images
-        ? data.images.split('\n').map((u) => u.trim()).filter(Boolean)
-        : [];
-
       const formData = new FormData();
       formData.append('name', data.name);
       formData.append('description', data.description);
       formData.append('price', String(data.price));
       formData.append('stock', String(data.stock));
       formData.append('categorySlug', data.categorySlug);
-      images.forEach((url) => formData.append('images', url));
+      imageFiles.forEach((file) => formData.append('images', file));
 
       await productsService.create(formData);
       router.push('/seller/products');
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to create product');
+      setError(err?.response?.data?.message ?? 'Failed to create product');
     }
   };
 
@@ -124,35 +126,20 @@ export default function NewProductPage() {
             />
           </div>
 
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-medium text-gray-700">Category</label>
-            <select
-              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                errors.categorySlug ? 'border-red-500' : 'border-gray-300'
-              }`}
-              {...register('categorySlug')}
-            >
-              <option value="">Select a category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c.slug}>{c.name}</option>
-              ))}
-            </select>
-            {errors.categorySlug && (
-              <p className="text-sm text-red-500">{errors.categorySlug.message}</p>
-            )}
-          </div>
+          <CategorySelect
+            categories={categories}
+            value={categorySlug}
+            onChange={(slug) => setValue('categorySlug', slug, { shouldValidate: true })}
+            onCategoryCreated={(cat) => setCategories((prev) => [...prev, cat])}
+            error={errors.categorySlug?.message}
+          />
 
-          <div className="flex flex-col gap-1 w-full">
-            <label className="text-sm font-medium text-gray-700">
-              Image URLs <span className="text-gray-400 font-normal">(one per line, optional)</span>
-            </label>
-            <textarea
-              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-              rows={3}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder:text-gray-400 resize-none text-sm"
-              {...register('images')}
-            />
-          </div>
+          <ImageUpload
+            existingImages={[]}
+            onRemoveExisting={() => {}}
+            files={imageFiles}
+            onFilesChange={setImageFiles}
+          />
 
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => router.back()}>
