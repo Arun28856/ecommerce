@@ -166,7 +166,7 @@ function SellerSidebar() {
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute requiredRole="seller">
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
         <SellerSidebar />
         <main className="flex-1 p-6 overflow-auto">
           {children}
