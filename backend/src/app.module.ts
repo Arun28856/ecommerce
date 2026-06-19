@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
@@ -24,6 +26,19 @@ import { CheckoutModule } from './checkout/checkout.module';
       }),
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: parseInt(config.get('THROTTLE_TTL') ?? '60') * 1000,
+            limit: parseInt(config.get('THROTTLE_LIMIT') ?? '100'),
+          },
+        ],
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -34,6 +49,12 @@ import { CheckoutModule } from './checkout/checkout.module';
     PaymentsModule,
     EarningsModule,
     CheckoutModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

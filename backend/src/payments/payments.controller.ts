@@ -1,4 +1,5 @@
 import { Controller, Post, UseGuards, Body, Req, Headers } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { RawBodyRequest } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dtos/create-payment.dto';
@@ -7,6 +8,8 @@ import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
+// 20 payment attempts per 60 seconds per IP
+@Throttle({ default: { ttl: 60000, limit: 20 } })
 @Controller('payments')
 export class PaymentsController {
     constructor(private readonly paymentsService: PaymentsService) {}

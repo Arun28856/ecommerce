@@ -4,12 +4,15 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CheckoutService } from './checkout.service';
 import { CheckoutDto } from './dtos/checkout.dto';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth.guard';
 import { BuyerGuard } from '../auth/guards/buyer.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
+// 15 checkout attempts per 60 seconds per IP
+@Throttle({ default: { ttl: 60000, limit: 15 } })
 @Controller('checkout')
 @UseGuards(FirebaseAuthGuard, BuyerGuard) // buyers only
 export class CheckoutController {
